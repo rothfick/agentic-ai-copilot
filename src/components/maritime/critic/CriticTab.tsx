@@ -47,7 +47,7 @@ export function CriticTab({
   const criticStep = run?.steps.find((s) => s.node === "critic_review");
   const isRunning = criticStep?.status === "running";
   const notStarted =
-    !critic && (run?.status === "pending" || (criticStep?.status === "idle" ?? true));
+    !critic && (run?.status === "pending" || !criticStep || criticStep.status === "idle");
 
   if (notStarted && !isRunning) {
     return (

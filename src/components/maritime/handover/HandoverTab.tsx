@@ -63,7 +63,7 @@ export function HandoverTab({
   const isGenerating = handoverStep?.status === "running";
   const notStartedYet =
     !handover &&
-    (run?.status === "pending" || (handoverStep?.status === "idle" ?? true));
+    (run?.status === "pending" || !handoverStep || handoverStep.status === "idle");
 
   if (notStartedYet && !isGenerating) {
     return (
