@@ -137,6 +137,7 @@ export interface AnalysisRun {
   currentStepIndex: number;
   steps: AnalysisStep[];
   classification?: ClassificationResult;
+  classificationOverride?: ClassificationOverride;
   extraction?: ExtractedField[];
   risks?: RiskItem[];
   handover?: HandoverSummary;
