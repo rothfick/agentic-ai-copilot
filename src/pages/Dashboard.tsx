@@ -50,7 +50,10 @@ const Dashboard = () => {
           <div className="lg:col-span-2">
             <RecentRunsTable />
           </div>
-          <UploadPlaceholderCard />
+          <div className="space-y-6">
+            <PortfolioReadinessCard />
+            <UploadPlaceholderCard />
+          </div>
         </div>
 
         <div className="mb-4 flex items-end justify-between">
