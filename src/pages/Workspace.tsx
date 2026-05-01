@@ -42,6 +42,7 @@ function fmtMs(ms: number) {
 const Workspace = () => {
   const { sampleId } = useParams();
   const sample = getSample(sampleId);
+  const [activeTab, setActiveTab] = useState("workflow");
   const {
     run,
     start,
