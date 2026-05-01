@@ -51,6 +51,8 @@ const Workspace = () => {
     updateField,
     confirmField,
     setClassificationOverride,
+    setRiskStatus,
+    setRiskComment,
   } = useAnalysisRun(sample);
 
   if (!sample) {
