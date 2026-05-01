@@ -7,6 +7,10 @@ import {
   Activity,
   FileBarChart,
   Anchor,
+  PlayCircle,
+  BookOpen,
+  FileText,
+  Target,
 } from "lucide-react";
 import {
   Sidebar,
@@ -21,13 +25,37 @@ import {
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 
-const items = [
-  { title: "Overview", url: "/", icon: Compass },
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
-  { title: "Sample Documents", url: "/samples", icon: FileStack },
-  { title: "Workspace", url: "/workspace", icon: Workflow },
-  { title: "Evals", url: "/evals", icon: Activity },
-  { title: "Reports", url: "/reports", icon: FileBarChart },
+const groups = [
+  {
+    label: "Product",
+    items: [
+      { title: "Overview", url: "/", icon: Compass },
+      { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+      { title: "Sample Documents", url: "/samples", icon: FileStack },
+      { title: "Workspace", url: "/workspace", icon: Workflow },
+    ],
+  },
+  {
+    label: "Demo",
+    items: [
+      { title: "Demo Walkthrough", url: "/demo", icon: PlayCircle },
+    ],
+  },
+  {
+    label: "Engineering",
+    items: [
+      { title: "Evals", url: "/evals", icon: Activity },
+      { title: "Reports", url: "/reports", icon: FileBarChart },
+      { title: "Architecture", url: "/architecture", icon: BookOpen },
+    ],
+  },
+  {
+    label: "Portfolio",
+    items: [
+      { title: "Portfolio README", url: "/portfolio-readme", icon: FileText },
+      { title: "Marcura Fit", url: "/marcura-fit", icon: Target },
+    ],
+  },
 ];
 
 export function AppSidebar() {
@@ -54,39 +82,41 @@ export function AppSidebar() {
           )}
         </div>
 
-        <SidebarGroup>
-          {!collapsed && (
-            <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
-              Workspace
-            </SidebarGroupLabel>
-          )}
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {items.map((item) => {
-                const active = isActive(item.url);
-                return (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={active}
-                      className={cn(
-                        "rounded-md transition-colors",
-                        active
-                          ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary"
-                          : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
-                      )}
-                    >
-                      <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3">
-                        <item.icon className={cn("h-4 w-4", active && "text-primary")} />
-                        {!collapsed && <span className="text-sm">{item.title}</span>}
-                      </NavLink>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {groups.map((group) => (
+          <SidebarGroup key={group.label}>
+            {!collapsed && (
+              <SidebarGroupLabel className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                {group.label}
+              </SidebarGroupLabel>
+            )}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {group.items.map((item) => {
+                  const active = isActive(item.url);
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={active}
+                        className={cn(
+                          "rounded-md transition-colors",
+                          active
+                            ? "bg-sidebar-accent text-sidebar-accent-foreground border-l-2 border-primary"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground"
+                        )}
+                      >
+                        <NavLink to={item.url} end={item.url === "/"} className="flex items-center gap-3">
+                          <item.icon className={cn("h-4 w-4", active && "text-primary")} />
+                          {!collapsed && <span className="text-sm">{item.title}</span>}
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        ))}
 
         {!collapsed && (
           <div className="mt-auto p-4">
