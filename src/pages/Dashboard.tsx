@@ -5,6 +5,7 @@ import { StatCard } from "@/components/maritime/StatCard";
 import { RecentRunsTable } from "@/components/maritime/RecentRunsTable";
 import { UploadPlaceholderCard } from "@/components/maritime/UploadPlaceholderCard";
 import { SampleDocumentCard } from "@/components/maritime/SampleDocumentCard";
+import { PortfolioReadinessCard } from "@/components/maritime/PortfolioReadinessCard";
 import { SAMPLES } from "@/data/samples";
 
 const Dashboard = () => {
