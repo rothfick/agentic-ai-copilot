@@ -152,6 +152,16 @@ const Workspace = () => {
                   <RotateCcw className="mr-1 h-4 w-4" /> Reset
                 </Button>
               )}
+              {isComplete && (
+                <Button
+                  asChild
+                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+                >
+                  <Link to={`/reports/sample/${sample.id}`}>
+                    <FileBarChart className="mr-1 h-4 w-4" /> Open Report
+                  </Link>
+                </Button>
+              )}
             </>
           }
         />
