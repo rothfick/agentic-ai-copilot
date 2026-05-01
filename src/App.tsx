@@ -10,6 +10,10 @@ import Workspace from "./pages/Workspace.tsx";
 import Evals from "./pages/Evals.tsx";
 import Reports from "./pages/Reports.tsx";
 import ReportDetail from "./pages/ReportDetail.tsx";
+import Demo from "./pages/Demo.tsx";
+import PortfolioReadme from "./pages/PortfolioReadme.tsx";
+import Architecture from "./pages/Architecture.tsx";
+import MarcuraFit from "./pages/MarcuraFit.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -29,6 +33,10 @@ const App = () => (
           <Route path="/evals" element={<Evals />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/reports/sample/:sampleId" element={<ReportDetail />} />
+          <Route path="/demo" element={<Demo />} />
+          <Route path="/architecture" element={<Architecture />} />
+          <Route path="/portfolio-readme" element={<PortfolioReadme />} />
+          <Route path="/marcura-fit" element={<MarcuraFit />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

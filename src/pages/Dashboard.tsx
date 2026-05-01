@@ -5,6 +5,7 @@ import { StatCard } from "@/components/maritime/StatCard";
 import { RecentRunsTable } from "@/components/maritime/RecentRunsTable";
 import { UploadPlaceholderCard } from "@/components/maritime/UploadPlaceholderCard";
 import { SampleDocumentCard } from "@/components/maritime/SampleDocumentCard";
+import { PortfolioReadinessCard } from "@/components/maritime/PortfolioReadinessCard";
 import { SAMPLES } from "@/data/samples";
 
 const Dashboard = () => {
@@ -49,7 +50,10 @@ const Dashboard = () => {
           <div className="lg:col-span-2">
             <RecentRunsTable />
           </div>
-          <UploadPlaceholderCard />
+          <div className="space-y-6">
+            <PortfolioReadinessCard />
+            <UploadPlaceholderCard />
+          </div>
         </div>
 
         <div className="mb-4 flex items-end justify-between">

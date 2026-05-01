@@ -10,6 +10,10 @@ const titles: Record<string, string> = {
   "/workspace": "Workspace",
   "/evals": "Evaluations",
   "/reports": "Reports",
+  "/demo": "Demo Walkthrough",
+  "/architecture": "Architecture",
+  "/portfolio-readme": "Portfolio README",
+  "/marcura-fit": "Marcura Fit",
 };
 
 export function TopBar() {
