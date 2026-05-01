@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SampleDocument } from "@/data/samples";
-import type { AnalysisRun, DocumentType } from "@/types/analysis";
+import type {
+  AnalysisRun,
+  DocumentType,
+  RiskReviewStatus,
+} from "@/types/analysis";
 import {
   createInitialRun,
   runSimulatedAnalysis,
