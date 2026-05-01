@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ScanLine,
   ClipboardList,
+  FileBarChart,
 } from "lucide-react";
 import { AppShell } from "@/components/maritime/AppShell";
 import { PageHeader } from "@/components/maritime/PageHeader";
@@ -36,6 +37,7 @@ import {
   getSchemaForRun,
   summarizeExtraction,
 } from "@/lib/extraction";
+import { persistRunForReport } from "@/lib/report";
 import { cn } from "@/lib/utils";
 
 function fmtMs(ms: number) {
