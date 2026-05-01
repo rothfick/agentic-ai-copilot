@@ -375,11 +375,20 @@ const Workspace = () => {
         </Tabs>
 
         {isComplete && (
-          <div className="mt-6 panel p-4 flex items-center gap-3">
+          <div className="mt-6 panel p-4 flex flex-wrap items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
-            <div className="text-sm">
+            <div className="text-sm flex-1 min-w-[220px]">
               Analysis complete — pipeline finished, awaiting human review.
             </div>
+            <Button
+              asChild
+              size="sm"
+              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+            >
+              <Link to={`/reports/sample/${sample.id}`}>
+                <FileBarChart className="mr-1 h-4 w-4" /> Open Analysis Report
+              </Link>
+            </Button>
           </div>
         )}
       </div>
