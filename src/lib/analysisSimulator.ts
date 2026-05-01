@@ -200,7 +200,7 @@ export async function runSimulatedAnalysis(
     let message = ACTIVITY_MESSAGES[meta.node];
     if (meta.node === "classify_document" && updatedRun.classification) {
       const pct = Math.round(updatedRun.classification.confidence * 100);
-      message = `Detected ${updatedRun.classification.type.replaceAll("_", " ")} structure with ${pct}% confidence.`;
+      message = `Detected ${updatedRun.classification.type.replace(/_/g, " ")} structure with ${pct}% confidence.`;
     } else if (meta.node === "extract_structured_data" && updatedRun.extraction) {
       message = `Validated ${updatedRun.extraction.length} extracted fields against schema candidates.`;
     } else if (meta.node === "detect_risks" && updatedRun.risks) {
