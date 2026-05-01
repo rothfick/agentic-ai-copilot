@@ -66,6 +66,13 @@ const Workspace = () => {
     setCriticIssueComment,
   } = useAnalysisRun(sample);
 
+  // Persist completed run so the Reports route can render the latest live analysis.
+  useEffect(() => {
+    if (run && sample && run.status === "complete") {
+      persistRunForReport(sample.id, run);
+    }
+  }, [run, sample]);
+
   if (!sample) {
     return (
       <AppShell>
