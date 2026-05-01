@@ -50,6 +50,13 @@ export interface ExtractedField {
   evidenceQuote?: string;
   isMissing?: boolean;
   userEdited?: boolean;
+  userConfirmed?: boolean;
+  previousValue?: string;
+}
+
+export interface ClassificationOverride {
+  type: DocumentType;
+  at: string;
 }
 
 export type RiskCategory =
@@ -130,6 +137,7 @@ export interface AnalysisRun {
   currentStepIndex: number;
   steps: AnalysisStep[];
   classification?: ClassificationResult;
+  classificationOverride?: ClassificationOverride;
   extraction?: ExtractedField[];
   risks?: RiskItem[];
   handover?: HandoverSummary;
