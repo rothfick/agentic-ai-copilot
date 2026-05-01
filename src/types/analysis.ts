@@ -50,6 +50,13 @@ export interface ExtractedField {
   evidenceQuote?: string;
   isMissing?: boolean;
   userEdited?: boolean;
+  userConfirmed?: boolean;
+  previousValue?: string;
+}
+
+export interface ClassificationOverride {
+  type: DocumentType;
+  at: string;
 }
 
 export type RiskCategory =
