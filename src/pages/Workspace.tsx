@@ -220,7 +220,7 @@ const Workspace = () => {
           </div>
         )}
 
-        <Tabs defaultValue="workflow" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="document">Document</TabsTrigger>
             <TabsTrigger value="workflow">Workflow</TabsTrigger>
