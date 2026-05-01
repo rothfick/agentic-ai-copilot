@@ -268,19 +268,7 @@ const Workspace = () => {
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => {
-                        const trigger = window.document.querySelector<HTMLButtonElement>(
-                          '[data-state][value="extraction"], [role="tab"][value="extraction"]'
-                        );
-                        // shadcn tab triggers expose value attribute; use querySelector by attribute.
-                        const tabs = window.document.querySelectorAll<HTMLButtonElement>(
-                          'button[role="tab"]'
-                        );
-                        tabs.forEach((t) => {
-                          if (t.textContent?.trim().startsWith("Extraction")) t.click();
-                        });
-                        trigger?.click();
-                      }}
+                      onClick={() => setActiveTab("extraction")}
                     >
                       Jump to Extraction
                     </Button>
