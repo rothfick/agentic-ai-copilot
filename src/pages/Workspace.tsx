@@ -308,18 +308,12 @@ const Workspace = () => {
             />
           </TabsContent>
 
-          {/* RISKS — placeholder, full impl in Phase 4 */}
+          {/* RISKS — Phase 4 */}
           <TabsContent value="risks" className="mt-4">
-            <PlaceholderTab
-              title="Risk Review"
-              count={run?.risks?.length ?? 0}
-              available={Boolean(run?.risks)}
-              waitingLabel="Awaiting risk detection."
-              ready={
-                run?.risks
-                  ? `${run.risks.length} risks flagged · ${run.risks.filter((r) => r.severity === "high" || r.severity === "critical").length} high+. Full risk register coming in Phase 4.`
-                  : ""
-              }
+            <RiskReviewTab
+              run={run}
+              onSetRiskStatus={setRiskStatus}
+              onSetRiskComment={setRiskComment}
             />
           </TabsContent>
 
