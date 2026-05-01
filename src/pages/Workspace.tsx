@@ -368,37 +368,4 @@ const Workspace = () => {
   );
 };
 
-function PlaceholderTab({
-  title,
-  count,
-  available,
-  waitingLabel,
-  ready,
-}: {
-  title: string;
-  count: number;
-  available: boolean;
-  waitingLabel: string;
-  ready: string;
-}) {
-  return (
-    <div className="panel p-8">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-semibold">{title}</h3>
-        {available && (
-          <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-            {count} items
-          </Badge>
-        )}
-      </div>
-      <p className="text-sm text-muted-foreground">
-        {available ? ready : waitingLabel}
-      </p>
-      <p className="text-xs text-muted-foreground mt-3">
-        Full UI for this section will be implemented in a later phase.
-      </p>
-    </div>
-  );
-}
-
 export default Workspace;
