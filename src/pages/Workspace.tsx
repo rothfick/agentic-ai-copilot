@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   ScanLine,
   ClipboardList,
+  FileBarChart,
 } from "lucide-react";
 import { AppShell } from "@/components/maritime/AppShell";
 import { PageHeader } from "@/components/maritime/PageHeader";
@@ -36,6 +37,7 @@ import {
   getSchemaForRun,
   summarizeExtraction,
 } from "@/lib/extraction";
+import { persistRunForReport } from "@/lib/report";
 import { cn } from "@/lib/utils";
 
 function fmtMs(ms: number) {
@@ -63,6 +65,13 @@ const Workspace = () => {
     setCriticIssueStatus,
     setCriticIssueComment,
   } = useAnalysisRun(sample);
+
+  // Persist completed run so the Reports route can render the latest live analysis.
+  useEffect(() => {
+    if (run && sample && run.status === "complete") {
+      persistRunForReport(sample.id, run);
+    }
+  }, [run, sample]);
 
   if (!sample) {
     return (
@@ -141,6 +150,16 @@ const Workspace = () => {
               {(isRunning || isComplete) && (
                 <Button onClick={reset} variant="outline" disabled={isRunning}>
                   <RotateCcw className="mr-1 h-4 w-4" /> Reset
+                </Button>
+              )}
+              {isComplete && (
+                <Button
+                  asChild
+                  className="bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+                >
+                  <Link to={`/reports/sample/${sample.id}`}>
+                    <FileBarChart className="mr-1 h-4 w-4" /> Open Report
+                  </Link>
                 </Button>
               )}
             </>
@@ -356,11 +375,20 @@ const Workspace = () => {
         </Tabs>
 
         {isComplete && (
-          <div className="mt-6 panel p-4 flex items-center gap-3">
+          <div className="mt-6 panel p-4 flex flex-wrap items-center gap-3">
             <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
-            <div className="text-sm">
+            <div className="text-sm flex-1 min-w-[220px]">
               Analysis complete — pipeline finished, awaiting human review.
             </div>
+            <Button
+              asChild
+              size="sm"
+              className="bg-gradient-to-r from-primary to-secondary text-primary-foreground"
+            >
+              <Link to={`/reports/sample/${sample.id}`}>
+                <FileBarChart className="mr-1 h-4 w-4" /> Open Analysis Report
+              </Link>
+            </Button>
           </div>
         )}
       </div>

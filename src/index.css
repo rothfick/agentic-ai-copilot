@@ -148,3 +148,76 @@
     font-family: ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, monospace;
   }
 }
+
+/* Phase 7 — Print stylesheet for the analysis report.
+   Switches to a light, document-like layout, hides app chrome,
+   and inserts page breaks between major sections. */
+@media print {
+  @page {
+    size: A4;
+    margin: 14mm 14mm 16mm 14mm;
+  }
+
+  html, body, #root {
+    background: white !important;
+    color: #0B1220 !important;
+  }
+
+  body {
+    background-image: none !important;
+  }
+
+  /* Hide everything by default, then re-show the report root. */
+  body * {
+    visibility: hidden !important;
+  }
+  .report-root, .report-root * {
+    visibility: visible !important;
+  }
+  .report-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Hide app chrome and any explicit no-print regions. */
+  aside, nav, header, [data-sidebar], .no-print {
+    display: none !important;
+  }
+
+  /* Document-like surfaces. */
+  .panel, .panel-elevated, .report-section, .report-cover {
+    background: white !important;
+    background-image: none !important;
+    color: #0B1220 !important;
+    border: 1px solid #d4d8e0 !important;
+    box-shadow: none !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .text-muted-foreground { color: #4b5563 !important; }
+  .text-foreground, .text-foreground\/90 { color: #0B1220 !important; }
+  .text-primary, .text-primary\/80 { color: #0e7490 !important; }
+  .mono { color: #0B1220 !important; }
+
+  blockquote {
+    background: #f8fafc !important;
+    color: #0B1220 !important;
+    border-left-color: #0e7490 !important;
+  }
+
+  table { color: #0B1220 !important; }
+  th, td { border-color: #d4d8e0 !important; }
+
+  /* Page breaks between major sections. */
+  .report-section { page-break-before: auto; }
+  .report-section + .report-section { margin-top: 8mm; }
+  .report-cover { page-break-after: always; }
+
+  a { color: #0B1220 !important; text-decoration: none !important; }
+}
