@@ -25,6 +25,7 @@ import { AgentActivityLog } from "@/components/maritime/AgentActivityLog";
 import { ResultStatCard } from "@/components/maritime/ResultStatCard";
 import { ExtractionTab } from "@/components/maritime/ExtractionTab";
 import { DocumentTabContent } from "@/components/maritime/DocumentTabContent";
+import { RiskReviewTab } from "@/components/maritime/risks/RiskReviewTab";
 import { getSample } from "@/data/samples";
 import { useAnalysisRun } from "@/hooks/useAnalysisRun";
 import {
