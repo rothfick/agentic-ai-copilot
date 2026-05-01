@@ -26,6 +26,8 @@ import { ResultStatCard } from "@/components/maritime/ResultStatCard";
 import { ExtractionTab } from "@/components/maritime/ExtractionTab";
 import { DocumentTabContent } from "@/components/maritime/DocumentTabContent";
 import { RiskReviewTab } from "@/components/maritime/risks/RiskReviewTab";
+import { HandoverTab } from "@/components/maritime/handover/HandoverTab";
+import { CriticTab } from "@/components/maritime/critic/CriticTab";
 import { getSample } from "@/data/samples";
 import { useAnalysisRun } from "@/hooks/useAnalysisRun";
 import {
@@ -53,6 +55,12 @@ const Workspace = () => {
     setClassificationOverride,
     setRiskStatus,
     setRiskComment,
+    updateHandoverContent,
+    cancelHandoverEdit,
+    approveHandover,
+    toggleHandoverAction,
+    setCriticIssueStatus,
+    setCriticIssueComment,
   } = useAnalysisRun(sample);
 
   if (!sample) {
@@ -317,33 +325,26 @@ const Workspace = () => {
             />
           </TabsContent>
 
-          {/* HANDOVER — placeholder */}
+          {/* HANDOVER — Phase 5 */}
           <TabsContent value="handover" className="mt-4">
-            <PlaceholderTab
-              title="Operator Handover"
-              count={run?.handover?.nextActions.length ?? 0}
-              available={Boolean(run?.handover)}
-              waitingLabel="Awaiting handover generation."
-              ready={
-                run?.handover
-                  ? `Generated with ${run.handover.nextActions.length} next actions. Full markdown export coming in Phase 5.`
-                  : ""
-              }
+            <HandoverTab
+              run={run}
+              sample={sample}
+              onUpdateContent={updateHandoverContent}
+              onCancelEdit={cancelHandoverEdit}
+              onApprove={approveHandover}
+              onToggleAction={toggleHandoverAction}
+              onJumpToTab={setActiveTab}
             />
           </TabsContent>
 
-          {/* CRITIC — placeholder */}
+          {/* CRITIC — Phase 5 */}
           <TabsContent value="critic" className="mt-4">
-            <PlaceholderTab
-              title="Critic Review"
-              count={run?.critic?.issues.length ?? 0}
-              available={Boolean(run?.critic)}
-              waitingLabel="Awaiting critic review."
-              ready={
-                run?.critic
-                  ? `Verdict: ${run.critic.overallVerdict.toUpperCase()} · ${run.critic.issues.length} issues raised.`
-                  : ""
-              }
+            <CriticTab
+              run={run}
+              onSetIssueStatus={setCriticIssueStatus}
+              onSetIssueComment={setCriticIssueComment}
+              onJumpToTab={setActiveTab}
             />
           </TabsContent>
 
