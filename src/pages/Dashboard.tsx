@@ -15,6 +15,12 @@ const Dashboard = () => {
           eyebrow="Cockpit"
           title="Operations Intelligence Dashboard"
           description="Monitor recent runs, AI quality and operational risk across your maritime document pipeline."
+          actions={
+            <span className="inline-flex items-center gap-2 rounded-md border border-success/30 bg-success/10 px-2.5 py-1 text-xs text-success">
+              <span className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+              Simulation layer ready
+            </span>
+          }
         />
 
         <div className="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-8">
