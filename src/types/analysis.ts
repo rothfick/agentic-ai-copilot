@@ -70,6 +70,8 @@ export type RiskCategory =
 
 export type RiskSeverity = "low" | "medium" | "high" | "critical";
 
+export type RiskReviewStatus = "open" | "accepted" | "dismissed" | "needs_follow_up";
+
 export interface RiskItem {
   id: string;
   title: string;
@@ -80,6 +82,13 @@ export interface RiskItem {
   businessImpact: string;
   recommendedAction: string;
   confidence: number;
+  // Phase 4 — human review workflow (optional, UI-managed).
+  status?: RiskReviewStatus;
+  reviewerComment?: string;
+  reviewedAt?: string;
+  owner?: string;
+  dueDate?: string;
+  relatedFieldKeys?: string[];
 }
 
 export interface HandoverSummary {
