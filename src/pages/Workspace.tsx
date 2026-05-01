@@ -28,6 +28,7 @@ import { DocumentTabContent } from "@/components/maritime/DocumentTabContent";
 import { RiskReviewTab } from "@/components/maritime/risks/RiskReviewTab";
 import { HandoverTab } from "@/components/maritime/handover/HandoverTab";
 import { CriticTab } from "@/components/maritime/critic/CriticTab";
+import { EvalsTab } from "@/components/maritime/evals/EvalsTab";
 import { getSample } from "@/data/samples";
 import { useAnalysisRun } from "@/hooks/useAnalysisRun";
 import {
@@ -348,19 +349,9 @@ const Workspace = () => {
             />
           </TabsContent>
 
-          {/* EVALS — placeholder */}
+          {/* EVALS — Phase 6 */}
           <TabsContent value="evals" className="mt-4">
-            <PlaceholderTab
-              title="Run Evaluations"
-              count={run?.evals?.length ?? 0}
-              available={Boolean(run?.evals)}
-              waitingLabel="Awaiting evaluation step."
-              ready={
-                run?.evals
-                  ? `${run.evals.length} metrics computed. Full eval breakdown on the Evals page.`
-                  : ""
-              }
-            />
+            <EvalsTab run={run} sample={sample} />
           </TabsContent>
         </Tabs>
 
@@ -376,38 +367,5 @@ const Workspace = () => {
     </AppShell>
   );
 };
-
-function PlaceholderTab({
-  title,
-  count,
-  available,
-  waitingLabel,
-  ready,
-}: {
-  title: string;
-  count: number;
-  available: boolean;
-  waitingLabel: string;
-  ready: string;
-}) {
-  return (
-    <div className="panel p-8">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-semibold">{title}</h3>
-        {available && (
-          <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-            {count} items
-          </Badge>
-        )}
-      </div>
-      <p className="text-sm text-muted-foreground">
-        {available ? ready : waitingLabel}
-      </p>
-      <p className="text-xs text-muted-foreground mt-3">
-        Full UI for this section will be implemented in a later phase.
-      </p>
-    </div>
-  );
-}
 
 export default Workspace;
