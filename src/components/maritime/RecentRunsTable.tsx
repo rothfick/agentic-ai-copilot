@@ -1,17 +1,28 @@
 import { Link } from "react-router-dom";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { SAMPLES } from "@/data/samples";
+import { ANALYSIS_FIXTURES } from "@/data/analysisFixtures";
+import { getRiskSummaryStats, SEVERITY_LABEL, SEVERITY_TOKENS } from "@/lib/risks";
+import { cn } from "@/lib/utils";
 
-const RUNS = SAMPLES.map((s, i) => ({
-  id: s.id,
-  doc: s.title,
-  type: s.documentTypeLabel,
-  status: i === 1 ? "Review" : "Passed",
-  risks: s.expectedRiskCount,
-  latency: [12.4, 9.8, 7.1][i],
-  cost: [0.094, 0.071, 0.062][i],
-  when: ["12 min ago", "1 hr ago", "Yesterday"][i],
-}));
+const META = [
+  { latency: 12.4, cost: 0.094, when: "12 min ago", status: "Passed" },
+  { latency: 9.8, cost: 0.071, when: "1 hr ago", status: "Review" },
+  { latency: 7.1, cost: 0.062, when: "Yesterday", status: "Passed" },
+];
+
+const RUNS = SAMPLES.map((s, i) => {
+  const fx = ANALYSIS_FIXTURES[s.id];
+  const stats = fx ? getRiskSummaryStats(fx.risks) : null;
+  return {
+    id: s.id,
+    doc: s.title,
+    type: s.documentTypeLabel,
+    risks: stats?.total ?? s.expectedRiskCount,
+    highest: stats?.highestSeverity ?? null,
+    ...META[i],
+  };
+});
 
 export function RecentRunsTable() {
   return (
@@ -32,6 +43,7 @@ export function RecentRunsTable() {
               <th className="text-left font-medium px-5 py-3">Type</th>
               <th className="text-left font-medium px-5 py-3">Status</th>
               <th className="text-right font-medium px-5 py-3">Risks</th>
+              <th className="text-left font-medium px-5 py-3">Top severity</th>
               <th className="text-right font-medium px-5 py-3">Latency</th>
               <th className="text-right font-medium px-5 py-3">Cost</th>
               <th className="text-right font-medium px-5 py-3">When</th>
@@ -64,6 +76,26 @@ export function RecentRunsTable() {
                   )}
                 </td>
                 <td className="px-5 py-3 text-right mono">{r.risks}</td>
+                <td className="px-5 py-3">
+                  {r.highest ? (
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide",
+                        SEVERITY_TOKENS[r.highest].badge,
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "h-1.5 w-1.5 rounded-full",
+                          SEVERITY_TOKENS[r.highest].dot,
+                        )}
+                      />
+                      {SEVERITY_LABEL[r.highest]}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
                 <td className="px-5 py-3 text-right mono">{r.latency}s</td>
                 <td className="px-5 py-3 text-right mono">${r.cost.toFixed(3)}</td>
                 <td className="px-5 py-3 text-right text-muted-foreground">{r.when}</td>

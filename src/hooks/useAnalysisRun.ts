@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { SampleDocument } from "@/data/samples";
-import type { AnalysisRun, DocumentType } from "@/types/analysis";
+import type {
+  AnalysisRun,
+  DocumentType,
+  RiskReviewStatus,
+} from "@/types/analysis";
 import {
   createInitialRun,
   runSimulatedAnalysis,
@@ -69,6 +73,41 @@ export function useAnalysisRun(document: SampleDocument | undefined) {
     });
   }, []);
 
+  const setRiskStatus = useCallback(
+    (riskId: string, status: RiskReviewStatus) => {
+      setRun((prev) => {
+        if (!prev?.risks) return prev;
+        return {
+          ...prev,
+          risks: prev.risks.map((r) =>
+            r.id === riskId
+              ? { ...r, status, reviewedAt: new Date().toISOString() }
+              : r,
+          ),
+        };
+      });
+    },
+    [],
+  );
+
+  const setRiskComment = useCallback((riskId: string, comment: string) => {
+    setRun((prev) => {
+      if (!prev?.risks) return prev;
+      return {
+        ...prev,
+        risks: prev.risks.map((r) =>
+          r.id === riskId
+            ? {
+                ...r,
+                reviewerComment: comment.length > 0 ? comment : undefined,
+                reviewedAt: new Date().toISOString(),
+              }
+            : r,
+        ),
+      };
+    });
+  }, []);
+
   return {
     run,
     start,
@@ -76,5 +115,7 @@ export function useAnalysisRun(document: SampleDocument | undefined) {
     updateField,
     confirmField,
     setClassificationOverride,
+    setRiskStatus,
+    setRiskComment,
   };
 }

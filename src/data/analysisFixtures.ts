@@ -59,6 +59,7 @@ const cp: SampleAnalysisFixture = {
       businessImpact: "Risk of delayed berth coordination, demurrage exposure on arrival.",
       recommendedAction: "Confirm discharge agent with Charterer at least 5 days before ETA Singapore.",
       confidence: 0.92,
+      relatedFieldKeys: ["discharge_agent", "discharge_port"],
     },
     {
       id: "r2",
@@ -70,6 +71,7 @@ const cp: SampleAnalysisFixture = {
       businessImpact: "Potential dispute on laytime calculation; demurrage/despatch exposure.",
       recommendedAction: "Request clarification of clause 6 or insert standard 6-hour turn-time wording.",
       confidence: 0.84,
+      relatedFieldKeys: ["laytime_trigger", "demurrage"],
     },
     {
       id: "r3",
@@ -81,6 +83,7 @@ const cp: SampleAnalysisFixture = {
       businessImpact: "Minor downside on despatch claim if laytime is saved.",
       recommendedAction: "Note for post-fixture; align with claims team on standard interpretation.",
       confidence: 0.78,
+      relatedFieldKeys: ["despatch"],
     },
   ],
   handover: {
@@ -200,6 +203,7 @@ const sof: SampleAnalysisFixture = {
       businessImpact: "Direct laytime exposure; potential demurrage swing of several thousand USD.",
       recommendedAction: "Cross-check CP weather working clause; obtain port log confirmation.",
       confidence: 0.86,
+      relatedFieldKeys: ["rain_stop", "weather_attribution"],
     },
     {
       id: "r2",
@@ -211,6 +215,7 @@ const sof: SampleAnalysisFixture = {
       businessImpact: "Could shift laytime commencement by several hours.",
       recommendedAction: "Verify CP NOR validity clause; recompute laytime if needed.",
       confidence: 0.81,
+      relatedFieldKeys: ["nor_tendered", "office_hours_ref"],
     },
   ],
   handover: {
@@ -322,6 +327,7 @@ const da: SampleAnalysisFixture = {
       businessImpact: "Risk of overpayment; weakens DA approval audit trail.",
       recommendedAction: "Request itemized breakdown of miscellaneous before approval.",
       confidence: 0.91,
+      relatedFieldKeys: ["misc", "misc_breakdown", "total"],
     },
     {
       id: "r2",
@@ -333,6 +339,7 @@ const da: SampleAnalysisFixture = {
       businessImpact: "Reconciliation risk on final DA vs estimate.",
       recommendedAction: "Ask agent for FX source (e.g., central bank rate, value date).",
       confidence: 0.85,
+      relatedFieldKeys: ["fx", "total"],
     },
     {
       id: "r3",
@@ -344,6 +351,7 @@ const da: SampleAnalysisFixture = {
       businessImpact: "Compliance / audit gap on agent engagement.",
       recommendedAction: "Obtain signed appointment letter before remitting funds.",
       confidence: 0.83,
+      relatedFieldKeys: ["appointment_letter", "agent"],
     },
   ],
   handover: {

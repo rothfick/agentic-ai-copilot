@@ -25,6 +25,7 @@ import { AgentActivityLog } from "@/components/maritime/AgentActivityLog";
 import { ResultStatCard } from "@/components/maritime/ResultStatCard";
 import { ExtractionTab } from "@/components/maritime/ExtractionTab";
 import { DocumentTabContent } from "@/components/maritime/DocumentTabContent";
+import { RiskReviewTab } from "@/components/maritime/risks/RiskReviewTab";
 import { getSample } from "@/data/samples";
 import { useAnalysisRun } from "@/hooks/useAnalysisRun";
 import {
@@ -50,6 +51,8 @@ const Workspace = () => {
     updateField,
     confirmField,
     setClassificationOverride,
+    setRiskStatus,
+    setRiskComment,
   } = useAnalysisRun(sample);
 
   if (!sample) {
@@ -305,18 +308,12 @@ const Workspace = () => {
             />
           </TabsContent>
 
-          {/* RISKS — placeholder, full impl in Phase 4 */}
+          {/* RISKS — Phase 4 */}
           <TabsContent value="risks" className="mt-4">
-            <PlaceholderTab
-              title="Risk Review"
-              count={run?.risks?.length ?? 0}
-              available={Boolean(run?.risks)}
-              waitingLabel="Awaiting risk detection."
-              ready={
-                run?.risks
-                  ? `${run.risks.length} risks flagged · ${run.risks.filter((r) => r.severity === "high" || r.severity === "critical").length} high+. Full risk register coming in Phase 4.`
-                  : ""
-              }
+            <RiskReviewTab
+              run={run}
+              onSetRiskStatus={setRiskStatus}
+              onSetRiskComment={setRiskComment}
             />
           </TabsContent>
 
