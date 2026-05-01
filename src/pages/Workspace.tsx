@@ -28,6 +28,7 @@ import { DocumentTabContent } from "@/components/maritime/DocumentTabContent";
 import { RiskReviewTab } from "@/components/maritime/risks/RiskReviewTab";
 import { HandoverTab } from "@/components/maritime/handover/HandoverTab";
 import { CriticTab } from "@/components/maritime/critic/CriticTab";
+import { EvalsTab } from "@/components/maritime/evals/EvalsTab";
 import { getSample } from "@/data/samples";
 import { useAnalysisRun } from "@/hooks/useAnalysisRun";
 import {
@@ -348,19 +349,9 @@ const Workspace = () => {
             />
           </TabsContent>
 
-          {/* EVALS — placeholder */}
+          {/* EVALS — Phase 6 */}
           <TabsContent value="evals" className="mt-4">
-            <PlaceholderTab
-              title="Run Evaluations"
-              count={run?.evals?.length ?? 0}
-              available={Boolean(run?.evals)}
-              waitingLabel="Awaiting evaluation step."
-              ready={
-                run?.evals
-                  ? `${run.evals.length} metrics computed. Full eval breakdown on the Evals page.`
-                  : ""
-              }
-            />
+            <EvalsTab run={run} sample={sample} />
           </TabsContent>
         </Tabs>
 
