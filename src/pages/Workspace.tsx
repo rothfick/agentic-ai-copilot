@@ -22,8 +22,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WorkflowStepper } from "@/components/maritime/WorkflowStepper";
 import { AgentActivityLog } from "@/components/maritime/AgentActivityLog";
 import { ResultStatCard } from "@/components/maritime/ResultStatCard";
+import { ExtractionTab } from "@/components/maritime/ExtractionTab";
+import { DocumentTabContent } from "@/components/maritime/DocumentTabContent";
 import { getSample } from "@/data/samples";
 import { useAnalysisRun } from "@/hooks/useAnalysisRun";
+import {
+  getExtractionFields,
+  getSchemaForRun,
+  summarizeExtraction,
+} from "@/lib/extraction";
 import { cn } from "@/lib/utils";
 
 function fmtMs(ms: number) {
@@ -34,7 +41,14 @@ function fmtMs(ms: number) {
 const Workspace = () => {
   const { sampleId } = useParams();
   const sample = getSample(sampleId);
-  const { run, start, reset } = useAnalysisRun(sample);
+  const {
+    run,
+    start,
+    reset,
+    updateField,
+    confirmField,
+    setClassificationOverride,
+  } = useAnalysisRun(sample);
 
   if (!sample) {
     return (
@@ -66,12 +80,12 @@ const Workspace = () => {
   const currentStep =
     run && run.currentStepIndex >= 0 ? run.steps[run.currentStepIndex] : null;
 
-  const completenessPct = run?.evals?.find(
-    (e) => e.key === "extraction_completeness"
-  )?.value;
-  const groundingPct = run?.evals?.find(
-    (e) => e.key === "evidence_grounding"
-  )?.value;
+  const schema = getSchemaForRun(run);
+  const fields = getExtractionFields(run);
+  const summary = summarizeExtraction(fields, schema);
+
+  const extractionReady = Boolean(run?.extraction && run.extraction.length > 0);
+  const groundingPct = run?.evals?.find((e) => e.key === "evidence_grounding")?.value;
 
   const statusBadge = (
     <Badge
@@ -79,12 +93,9 @@ const Workspace = () => {
       className={cn(
         "capitalize",
         status === "pending" && "border-border text-muted-foreground",
-        status === "running" &&
-          "border-primary/40 bg-primary/10 text-primary",
-        status === "complete" &&
-          "border-success/40 bg-success/10 text-success",
-        status === "error" &&
-          "border-destructive/40 bg-destructive/10 text-destructive"
+        status === "running" && "border-primary/40 bg-primary/10 text-primary",
+        status === "complete" && "border-success/40 bg-success/10 text-success",
+        status === "error" && "border-destructive/40 bg-destructive/10 text-destructive"
       )}
     >
       {status}
@@ -148,12 +159,14 @@ const Workspace = () => {
               label="Document Type"
               value={
                 run.classification
-                  ? run.classification.type.replace(/_/g, " ")
+                  ? (run.classificationOverride?.type ?? run.classification.type).replace(/_/g, " ")
                   : "—"
               }
               hint={
                 run.classification
-                  ? `${Math.round(run.classification.confidence * 100)}% confidence`
+                  ? run.classificationOverride
+                    ? "Manual override"
+                    : `${Math.round(run.classification.confidence * 100)}% confidence`
                   : "Pending classification"
               }
               icon={ScanLine}
@@ -172,28 +185,18 @@ const Workspace = () => {
             />
             <ResultStatCard
               label="Extraction"
-              value={
-                completenessPct !== undefined
-                  ? `${completenessPct}%`
-                  : run.extraction
-                  ? `${run.extraction.length} fields`
-                  : "—"
-              }
+              value={extractionReady ? `${summary.completed}/${summary.required}` : "—"}
               hint={
-                completenessPct !== undefined
-                  ? "Completeness"
-                  : run.extraction
-                  ? "Extracted"
+                extractionReady
+                  ? `${Math.round(summary.overallConfidence * 100)}% confidence`
                   : "Pending"
               }
               icon={ClipboardList}
-              tone={run.extraction ? "primary" : "default"}
+              tone={extractionReady ? "primary" : "default"}
             />
             <ResultStatCard
               label="Grounding"
-              value={
-                groundingPct !== undefined ? `${groundingPct}%` : "—"
-              }
+              value={groundingPct !== undefined ? `${groundingPct}%` : "—"}
               hint="Evidence-backed"
               icon={Gauge}
               tone={groundingPct !== undefined ? "success" : "default"}
@@ -201,9 +204,7 @@ const Workspace = () => {
             <ResultStatCard
               label="Token Cost"
               value={
-                run.totals.costUsd > 0
-                  ? `$${run.totals.costUsd.toFixed(4)}`
-                  : "$0.00"
+                run.totals.costUsd > 0 ? `$${run.totals.costUsd.toFixed(4)}` : "$0.00"
               }
               hint={`${run.totals.tokens} tokens`}
               icon={Coins}
@@ -211,25 +212,34 @@ const Workspace = () => {
             <ResultStatCard
               label="Latency"
               value={fmtMs(run.totals.latencyMs)}
-              hint={
-                isRunning
-                  ? "Live"
-                  : isComplete
-                  ? "Total"
-                  : "Idle"
-              }
+              hint={isRunning ? "Live" : isComplete ? "Total" : "Idle"}
               icon={Timer}
             />
           </div>
         )}
 
         <Tabs defaultValue="workflow" className="w-full">
-          <TabsList>
-            <TabsTrigger value="workflow">Workflow</TabsTrigger>
+          <TabsList className="flex-wrap h-auto">
             <TabsTrigger value="document">Document</TabsTrigger>
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="results">Results</TabsTrigger>
+            <TabsTrigger value="workflow">Workflow</TabsTrigger>
+            <TabsTrigger value="extraction" className="gap-1.5">
+              Extraction
+              {extractionReady && (
+                <span className="inline-flex items-center justify-center rounded-full bg-primary/15 text-primary text-[10px] px-1.5 py-0">
+                  {summary.completed}/{summary.required}
+                </span>
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="risks">Risks</TabsTrigger>
+            <TabsTrigger value="handover">Handover</TabsTrigger>
+            <TabsTrigger value="critic">Critic</TabsTrigger>
+            <TabsTrigger value="evals">Evals</TabsTrigger>
           </TabsList>
+
+          {/* DOCUMENT TAB */}
+          <TabsContent value="document" className="mt-4">
+            <DocumentTabContent sample={sample} />
+          </TabsContent>
 
           {/* WORKFLOW TAB */}
           <TabsContent value="workflow" className="mt-4">
@@ -240,8 +250,40 @@ const Workspace = () => {
                   currentIndex={run?.currentStepIndex ?? -1}
                 />
               </div>
-              <div className="lg:col-span-2">
+              <div className="lg:col-span-2 space-y-4">
                 <AgentActivityLog entries={run?.activityLog ?? []} />
+                {extractionReady && (
+                  <div className="panel p-4 flex items-center justify-between gap-3">
+                    <div>
+                      <div className="text-sm font-semibold">
+                        Extraction ready
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-0.5">
+                        {summary.completed}/{summary.required} fields ·{" "}
+                        {summary.missing} missing
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        const trigger = window.document.querySelector<HTMLButtonElement>(
+                          '[data-state][value="extraction"], [role="tab"][value="extraction"]'
+                        );
+                        // shadcn tab triggers expose value attribute; use querySelector by attribute.
+                        const tabs = window.document.querySelectorAll<HTMLButtonElement>(
+                          'button[role="tab"]'
+                        );
+                        tabs.forEach((t) => {
+                          if (t.textContent?.trim().startsWith("Extraction")) t.click();
+                        });
+                        trigger?.click();
+                      }}
+                    >
+                      Jump to Extraction
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
             {!run || (status === "pending" && run.activityLog.length === 0) ? (
@@ -263,257 +305,121 @@ const Workspace = () => {
             ) : null}
           </TabsContent>
 
-          {/* DOCUMENT TAB */}
-          <TabsContent value="document" className="mt-4">
-            <div className="grid gap-6 lg:grid-cols-5">
-              <div className="lg:col-span-3 panel p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold">Raw document</h3>
-                  <span className="text-xs text-muted-foreground">Synthetic</span>
-                </div>
-                <pre className="mono text-xs leading-relaxed text-muted-foreground bg-panel-elevated/70 border border-border rounded-md p-4 max-h-[420px] overflow-auto whitespace-pre-wrap">
-                  {sample.rawText}
-                </pre>
-              </div>
-              <div className="lg:col-span-2 space-y-4">
-                <div className="panel p-5">
-                  <h3 className="text-sm font-semibold mb-3">Document metadata</h3>
-                  <ul className="space-y-2 text-sm">
-                    <li className="flex justify-between gap-3">
-                      <span className="text-muted-foreground">Type</span>
-                      <span className="text-foreground">{sample.documentTypeLabel}</span>
-                    </li>
-                    <li className="flex justify-between gap-3">
-                      <span className="text-muted-foreground">Pages</span>
-                      <span className="text-foreground">{sample.estimatedPages}</span>
-                    </li>
-                    <li className="flex justify-between gap-3">
-                      <span className="text-muted-foreground">Complexity</span>
-                      <span className="text-foreground">{sample.complexity}</span>
-                    </li>
-                    <li className="flex justify-between gap-3">
-                      <span className="text-muted-foreground">Expected risks</span>
-                      <span className="text-foreground">{sample.expectedRiskCount}</span>
-                    </li>
-                  </ul>
-                </div>
-                <div className="panel p-4 text-xs text-muted-foreground">
-                  This document is synthetic and was generated for demo purposes.
-                  No real customer data is used.
-                </div>
-              </div>
-            </div>
+          {/* EXTRACTION TAB — Phase 3 main focus */}
+          <TabsContent value="extraction" className="mt-4">
+            <ExtractionTab
+              run={run}
+              onUpdateField={updateField}
+              onConfirmField={confirmField}
+              onOverrideClassification={setClassificationOverride}
+            />
           </TabsContent>
 
-          {/* SUMMARY TAB */}
-          <TabsContent value="summary" className="mt-4">
-            <div className="grid gap-6 lg:grid-cols-3">
-              <div className="panel p-5">
-                <h3 className="text-sm font-semibold mb-3">Run status</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status</span>
-                    {statusBadge}
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Current step</span>
-                    <span className="text-foreground">
-                      {currentStep ? currentStep.label : isComplete ? "Done" : "—"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Started</span>
-                    <span className="text-foreground mono text-xs">
-                      {run ? new Date(run.createdAt).toLocaleTimeString() : "—"}
-                    </span>
-                  </div>
-                  {run?.completedAt && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Completed</span>
-                      <span className="text-foreground mono text-xs">
-                        {new Date(run.completedAt).toLocaleTimeString()}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="panel p-5">
-                <h3 className="text-sm font-semibold mb-3">Classification</h3>
-                {run?.classification ? (
-                  <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Type</span>
-                      <span className="text-foreground capitalize">
-                        {run.classification.type.replace(/_/g, " ")}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Confidence</span>
-                      <span className="text-foreground">
-                        {Math.round(run.classification.confidence * 100)}%
-                      </span>
-                    </div>
-                    <div className="pt-2 border-t border-border">
-                      <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-1">
-                        Alternatives
-                      </div>
-                      {run.classification.alternatives.map((a) => (
-                        <div key={a.type} className="flex justify-between text-xs">
-                          <span className="text-muted-foreground capitalize">
-                            {a.type.replace(/_/g, " ")}
-                          </span>
-                          <span className="text-foreground">
-                            {Math.round(a.probability * 100)}%
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <p className="text-sm text-muted-foreground">Pending classification.</p>
-                )}
-              </div>
-              <div className="panel p-5">
-                <h3 className="text-sm font-semibold mb-3">Totals</h3>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Latency</span>
-                    <span className="text-foreground mono">
-                      {fmtMs(run?.totals.latencyMs ?? 0)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Tokens</span>
-                    <span className="text-foreground mono">
-                      {run?.totals.tokens ?? 0}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Cost</span>
-                    <span className="text-foreground mono">
-                      ${(run?.totals.costUsd ?? 0).toFixed(4)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+          {/* RISKS — placeholder, full impl in Phase 4 */}
+          <TabsContent value="risks" className="mt-4">
+            <PlaceholderTab
+              title="Risk Review"
+              count={run?.risks?.length ?? 0}
+              available={Boolean(run?.risks)}
+              waitingLabel="Awaiting risk detection."
+              ready={
+                run?.risks
+                  ? `${run.risks.length} risks flagged · ${run.risks.filter((r) => r.severity === "high" || r.severity === "critical").length} high+. Full risk register coming in Phase 4.`
+                  : ""
+              }
+            />
           </TabsContent>
 
-          {/* EARLY RESULTS PREVIEW */}
-          <TabsContent value="results" className="mt-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <div className="panel p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Extraction</h3>
-                  {run?.extraction && (
-                    <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-                      {run.extraction.length} fields
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {run?.extraction
-                    ? `${run.extraction.filter((f) => !f.isMissing).length} extracted, ${run.extraction.filter((f) => f.isMissing).length} missing.`
-                    : "Awaiting extraction step."}
-                </p>
-              </div>
-              <div className="panel p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Risks</h3>
-                  {run?.risks && (
-                    <Badge variant="outline" className="border-warning/30 bg-warning/10 text-warning">
-                      {run.risks.length} flagged
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {run?.risks
-                    ? `${run.risks.filter((r) => r.severity === "high" || r.severity === "critical").length} high+ · ${run.risks.filter((r) => r.severity === "medium").length} medium · ${run.risks.filter((r) => r.severity === "low").length} low.`
-                    : "Awaiting risk detection."}
-                </p>
-              </div>
-              <div className="panel p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Handover</h3>
-                  {run?.handover && (
-                    <Badge variant="outline" className="border-success/30 bg-success/10 text-success">
-                      Generated
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {run?.handover
-                    ? `${run.handover.nextActions.length} next actions · owner: ${run.handover.owner ?? "TBD"}.`
-                    : "Awaiting handover generation."}
-                </p>
-              </div>
-              <div className="panel p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Critic</h3>
-                  {run?.critic && (
-                    <Badge
-                      variant="outline"
-                      className={cn(
-                        "capitalize",
-                        run.critic.overallVerdict === "pass" &&
-                          "border-success/30 bg-success/10 text-success",
-                        run.critic.overallVerdict === "review" &&
-                          "border-warning/30 bg-warning/10 text-warning",
-                        run.critic.overallVerdict === "fail" &&
-                          "border-destructive/30 bg-destructive/10 text-destructive"
-                      )}
-                    >
-                      {run.critic.overallVerdict}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {run?.critic
-                    ? `${run.critic.issues.length} issue${run.critic.issues.length === 1 ? "" : "s"} raised.`
-                    : "Awaiting critic review."}
-                </p>
-              </div>
-              <div className="panel p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Evaluations</h3>
-                  {run?.evals && (
-                    <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
-                      {run.evals.length} metrics
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {run?.evals
-                    ? `Computed across ${run.evals.length} dimensions including grounding and hallucination risk.`
-                    : "Awaiting evaluation step."}
-                </p>
-              </div>
-              <div className="panel p-5">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className="text-sm font-semibold">Human Review</h3>
-                  {isComplete && (
-                    <Badge variant="outline" className="border-warning/30 bg-warning/10 text-warning">
-                      Waiting
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  {isComplete ? (
-                    <>
-                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-                      Analysis complete — waiting for human review.
-                    </>
-                  ) : (
-                    "Pending end of pipeline."
-                  )}
-                </p>
-              </div>
-            </div>
+          {/* HANDOVER — placeholder */}
+          <TabsContent value="handover" className="mt-4">
+            <PlaceholderTab
+              title="Operator Handover"
+              count={run?.handover?.nextActions.length ?? 0}
+              available={Boolean(run?.handover)}
+              waitingLabel="Awaiting handover generation."
+              ready={
+                run?.handover
+                  ? `Generated with ${run.handover.nextActions.length} next actions. Full markdown export coming in Phase 5.`
+                  : ""
+              }
+            />
+          </TabsContent>
+
+          {/* CRITIC — placeholder */}
+          <TabsContent value="critic" className="mt-4">
+            <PlaceholderTab
+              title="Critic Review"
+              count={run?.critic?.issues.length ?? 0}
+              available={Boolean(run?.critic)}
+              waitingLabel="Awaiting critic review."
+              ready={
+                run?.critic
+                  ? `Verdict: ${run.critic.overallVerdict.toUpperCase()} · ${run.critic.issues.length} issues raised.`
+                  : ""
+              }
+            />
+          </TabsContent>
+
+          {/* EVALS — placeholder */}
+          <TabsContent value="evals" className="mt-4">
+            <PlaceholderTab
+              title="Run Evaluations"
+              count={run?.evals?.length ?? 0}
+              available={Boolean(run?.evals)}
+              waitingLabel="Awaiting evaluation step."
+              ready={
+                run?.evals
+                  ? `${run.evals.length} metrics computed. Full eval breakdown on the Evals page.`
+                  : ""
+              }
+            />
           </TabsContent>
         </Tabs>
+
+        {isComplete && (
+          <div className="mt-6 panel p-4 flex items-center gap-3">
+            <CheckCircle2 className="h-5 w-5 text-success shrink-0" />
+            <div className="text-sm">
+              Analysis complete — pipeline finished, awaiting human review.
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );
 };
+
+function PlaceholderTab({
+  title,
+  count,
+  available,
+  waitingLabel,
+  ready,
+}: {
+  title: string;
+  count: number;
+  available: boolean;
+  waitingLabel: string;
+  ready: string;
+}) {
+  return (
+    <div className="panel p-8">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className="text-base font-semibold">{title}</h3>
+        {available && (
+          <Badge variant="outline" className="border-primary/30 bg-primary/10 text-primary">
+            {count} items
+          </Badge>
+        )}
+      </div>
+      <p className="text-sm text-muted-foreground">
+        {available ? ready : waitingLabel}
+      </p>
+      <p className="text-xs text-muted-foreground mt-3">
+        Full UI for this section will be implemented in a later phase.
+      </p>
+    </div>
+  );
+}
 
 export default Workspace;
