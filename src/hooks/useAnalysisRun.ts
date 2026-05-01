@@ -2,7 +2,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { SampleDocument } from "@/data/samples";
 import type {
   AnalysisRun,
+  CriticIssueStatus,
   DocumentType,
+  HumanFeedback,
   RiskReviewStatus,
 } from "@/types/analysis";
 import {
@@ -18,7 +20,6 @@ export function useAnalysisRun(document: SampleDocument | undefined) {
   const [run, setRun] = useState<AnalysisRun | null>(null);
   const cancelledRef = useRef(false);
 
-  // Reset whenever the document changes.
   useEffect(() => {
     cancelledRef.current = true;
     if (document) {
@@ -108,6 +109,118 @@ export function useAnalysisRun(document: SampleDocument | undefined) {
     });
   }, []);
 
+  // ---------- Phase 5 — Handover ----------
+
+  const updateHandoverContent = useCallback((markdown: string) => {
+    setRun((prev) => {
+      if (!prev?.handover) return prev;
+      return {
+        ...prev,
+        handover: {
+          ...prev.handover,
+          editedMarkdown: markdown,
+          userEdited: true,
+          editedAt: new Date().toISOString(),
+          approved: false,
+          approvedAt: undefined,
+        },
+      };
+    });
+  }, []);
+
+  const cancelHandoverEdit = useCallback(() => {
+    setRun((prev) => {
+      if (!prev?.handover) return prev;
+      const { editedMarkdown, ...rest } = prev.handover;
+      return { ...prev, handover: { ...rest } };
+    });
+  }, []);
+
+  const approveHandover = useCallback(() => {
+    setRun((prev) => {
+      if (!prev?.handover) return prev;
+      const at = new Date().toISOString();
+      const feedback: HumanFeedback = {
+        id: `fb_handover_${Date.now().toString(36)}`,
+        section: "handover",
+        decision: "accept",
+        at,
+      };
+      const otherFeedback = prev.feedback.filter(
+        (f) => f.section !== "handover",
+      );
+      return {
+        ...prev,
+        handover: {
+          ...prev.handover,
+          approved: true,
+          approvedAt: at,
+        },
+        feedback: [...otherFeedback, feedback],
+      };
+    });
+  }, []);
+
+  const toggleHandoverAction = useCallback((actionId: string) => {
+    setRun((prev) => {
+      if (!prev?.handover) return prev;
+      const current = prev.handover.completedActionIds ?? [];
+      const next = current.includes(actionId)
+        ? current.filter((id) => id !== actionId)
+        : [...current, actionId];
+      return {
+        ...prev,
+        handover: { ...prev.handover, completedActionIds: next },
+      };
+    });
+  }, []);
+
+  // ---------- Phase 5 — Critic ----------
+
+  const setCriticIssueStatus = useCallback(
+    (issueId: string, status: CriticIssueStatus) => {
+      setRun((prev) => {
+        if (!prev?.critic) return prev;
+        return {
+          ...prev,
+          critic: {
+            ...prev.critic,
+            issues: prev.critic.issues.map((i) =>
+              i.id === issueId
+                ? { ...i, status, reviewedAt: new Date().toISOString() }
+                : i,
+            ),
+          },
+        };
+      });
+    },
+    [],
+  );
+
+  const setCriticIssueComment = useCallback(
+    (issueId: string, comment: string) => {
+      setRun((prev) => {
+        if (!prev?.critic) return prev;
+        return {
+          ...prev,
+          critic: {
+            ...prev.critic,
+            issues: prev.critic.issues.map((i) =>
+              i.id === issueId
+                ? {
+                    ...i,
+                    comment: comment.length > 0 ? comment : undefined,
+                    reviewedAt: new Date().toISOString(),
+                  }
+                : i,
+            ),
+          },
+        };
+      });
+    },
+    [],
+  );
+
   return {
     run,
     start,
@@ -117,5 +230,11 @@ export function useAnalysisRun(document: SampleDocument | undefined) {
     setClassificationOverride,
     setRiskStatus,
     setRiskComment,
+    updateHandoverContent,
+    cancelHandoverEdit,
+    approveHandover,
+    toggleHandoverAction,
+    setCriticIssueStatus,
+    setCriticIssueComment,
   };
 }

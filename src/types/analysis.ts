@@ -91,13 +91,30 @@ export interface RiskItem {
   relatedFieldKeys?: string[];
 }
 
+export type HandoverReviewStatus =
+  | "not_generated"
+  | "draft"
+  | "needs_review"
+  | "edited"
+  | "approved";
+
 export interface HandoverSummary {
   markdown: string;
   headlineRisks: string[];
   nextActions: string[];
   owner?: string;
   generatedAt: string;
+  // Phase 5 — human review state.
+  editedMarkdown?: string;
+  userEdited?: boolean;
+  editedAt?: string;
+  approved?: boolean;
+  approvedAt?: string;
+  reviewStatus?: HandoverReviewStatus;
+  completedActionIds?: string[];
 }
+
+export type CriticIssueStatus = "open" | "accepted" | "dismissed";
 
 export interface CriticIssue {
   id: string;
@@ -105,7 +122,9 @@ export interface CriticIssue {
   severity: RiskSeverity;
   message: string;
   suggestedFix?: string;
-  status: "open" | "accepted" | "dismissed";
+  status: CriticIssueStatus;
+  comment?: string;
+  reviewedAt?: string;
 }
 
 export interface CriticReview {
