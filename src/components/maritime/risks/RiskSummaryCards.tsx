@@ -5,7 +5,6 @@ import {
   ListChecks,
   ShieldAlert,
   ShieldCheck,
-  XCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -116,6 +115,3 @@ export function RiskSummaryCards({ stats }: { stats: RiskSummaryStats }) {
     </div>
   );
 }
-
-// Re-export so consumers can pull from a single place.
-export { XCircle };
