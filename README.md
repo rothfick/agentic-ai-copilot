@@ -1,3 +1,20 @@
+<!-- README_PRESENTATION_START -->
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=rect&height=140&color=0:020617,100:7C3AED&text=Agentic%20AI%20Copilot&fontColor=FFFFFF&fontSize=30&fontAlignY=42&desc=AI%20workflow%20simulator%20with%20schema%20extraction%2C%20risk%20review%20and%20evals&descAlignY=68&descSize=15" alt="Agentic AI Copilot banner" />
+</p>
+
+<p align="center">
+  <img alt="TypeScript: React" src="https://img.shields.io/badge/TypeScript-React-3178C6?style=for-the-badge" /> <img alt="AI: Agent Workflow" src="https://img.shields.io/badge/AI-Agent%20Workflow-7C3AED?style=for-the-badge" /> <img alt="Quality: Evals" src="https://img.shields.io/badge/Quality-Evals-0EA5E9?style=for-the-badge" /> <img alt="Trust: Evidence Grounding" src="https://img.shields.io/badge/Trust-Evidence%20Grounding-059669?style=for-the-badge" /> <img alt="Review: Human-in-the-loop" src="https://img.shields.io/badge/Review-Human--in--the--loop-F97316?style=for-the-badge" />
+</p>
+
+<table>
+  <tr><td><strong>Role signal</strong></td><td>AI QA, eval-driven workflows, assistant feature validation</td></tr>
+<tr><td><strong>What to inspect</strong></td><td><code>extraction.ts</code>, <code>evals.ts</code>, risk review, deterministic fixtures</td></tr>
+<tr><td><strong>Best for</strong></td><td>JetBrains AI Assistant, QA AI Engineer, AI product testing roles</td></tr>
+</table>
+
+<!-- README_PRESENTATION_END -->
+
 # Agentic AI Copilot
 
 Deterministic AI workflow simulator for maritime document intelligence, operational risk review, evidence-grounded extraction, evaluation metrics, and human-in-the-loop handover.
